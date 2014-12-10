@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="module_monitor" default="compile.module.monitor">
+  <dirname property="module.monitor.basedir" file="${ant.file.module_monitor}"/>
+  
+  <property name="module.jdk.home.monitor" value="${project.jdk.home}"/>
+  <property name="module.jdk.bin.monitor" value="${project.jdk.bin}"/>
+  <property name="module.jdk.classpath.monitor" value="${project.jdk.classpath}"/>
+  
+  <property name="compiler.args.monitor" value="-encoding UTF-8 -source 1.6 ${compiler.args}"/>
+  
+  <property name="monitor.output.dir" value="${module.monitor.basedir}/out/production/monitor"/>
+  <property name="monitor.testoutput.dir" value="${module.monitor.basedir}/out/test/monitor"/>
+  
+  <path id="monitor.module.bootclasspath">
+    <!-- Paths to be included in compilation bootclasspath -->
+  </path>
+  
+  <path id="monitor.module.production.classpath">
+    <path refid="${module.jdk.classpath.monitor}"/>
+  </path>
+  
+  <path id="monitor.runtime.production.module.classpath">
+    <pathelement location="${monitor.output.dir}"/>
+  </path>
+  
+  <path id="monitor.module.classpath">
+    <path refid="${module.jdk.classpath.monitor}"/>
+    <pathelement location="${monitor.output.dir}"/>
+  </path>
+  
+  <path id="monitor.runtime.module.classpath">
+    <pathelement location="${monitor.testoutput.dir}"/>
+    <pathelement location="${monitor.output.dir}"/>
+  </path>
+  
+  
+  <patternset id="excluded.from.module.monitor">
+    <patternset refid="ignored.files"/>
+  </patternset>
+  
+  <patternset id="excluded.from.compilation.monitor">
+    <patternset refid="excluded.from.module.monitor"/>
+  </patternset>
+  
+  <path id="monitor.module.sourcepath">
+    <dirset dir="${module.monitor.basedir}">
+      <include name="src"/>
+      <include name="gen"/>
+    </dirset>
+  </path>
+  
+  
+  <target name="compile.module.monitor" depends="compile.module.monitor.production,compile.module.monitor.tests" description="Compile module monitor"/>
+  
+  <target name="compile.module.monitor.production" depends="register.custom.compilers" description="Compile module monitor; production classes">
+    <mkdir dir="${monitor.output.dir}"/>
+    <javac2 destdir="${monitor.output.dir}" debug="${compiler.debug}" nowarn="${compiler.generate.no.warnings}" memorymaximumsize="${compiler.max.memory}" fork="true" executable="${module.jdk.bin.monitor}/javac">
+      <compilerarg line="${compiler.args.monitor}"/>
+      <bootclasspath refid="monitor.module.bootclasspath"/>
+      <classpath refid="monitor.module.production.classpath"/>
+      <src refid="monitor.module.sourcepath"/>
+      <patternset refid="excluded.from.compilation.monitor"/>
+    </javac2>
+    
+    <copy todir="${monitor.output.dir}">
+      <fileset dir="${module.monitor.basedir}/src">
+        <patternset refid="compiler.resources"/>
+        <type type="file"/>
+      </fileset>
+      <fileset dir="${module.monitor.basedir}/gen">
+        <patternset refid="compiler.resources"/>
+        <type type="file"/>
+      </fileset>
+    </copy>
+  </target>
+  
+  <target name="compile.module.monitor.tests" depends="register.custom.compilers,compile.module.monitor.production" description="compile module monitor; test classes" unless="skip.tests"/>
+  
+  <target name="clean.module.monitor" description="cleanup module">
+    <delete dir="${monitor.output.dir}"/>
+    <delete dir="${monitor.testoutput.dir}"/>
+  </target>
+</project>
